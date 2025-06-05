@@ -1,0 +1,61 @@
+@startuml Container Controle de Exportação
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define AzurePuml https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/release/2-2/dist
+!includeurl AzurePuml/AzureCommon.puml
+!includeurl AzurePuml/Databases/AzureDatabaseForPostgreSQL.puml
+!includeurl AzurePuml/Databases/AzureRedisCache.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!include DEVICONS/postgresql.puml
+!include DEVICONS/angular.puml
+!include DEVICONS/java.puml
+!include DEVICONS/redis.puml
+
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include FONTAWESOME/users.puml
+
+HIDE_STEREOTYPE()
+
+AddElementTag("microService", $shape=EightSidedShape(), $legendText="micro service (eight sided) (no text, no back color)")
+AddRelTag("async", $textColor=$ARROW_FONT_COLOR, $lineColor=$ARROW_COLOR, $lineStyle=DashedLine())
+AddRelTag("operacional", $textColor=$ARROW_FONT_COLOR, $lineColor=$ARROW_COLOR)
+AddRelTag("async", $textColor=$ARROW_FONT_COLOR, $lineColor=$ARROW_COLOR, $lineStyle=DashedLine())
+
+title Jornada de Controle de Exportação - Sistema de Exportação
+
+Enterprise_Boundary(cia, "Cia Exportadora") {
+
+    Person(operacional, "Operacional", "Usuários Chave da área de Comércio Exterior", $sprite="users")
+    Person(contador, "Contador", "Usuários da área Contábil", $sprite="users")
+
+    System_Boundary(pexpam, "Novo Sistema de Exportação") {
+        Container(spa, "Single-Page App", "Typescript, Angular", "Interface de Usuário para utilização do sistema",  $sprite="angular")
+        
+        System_Boundary(services, "Serviços Lógica") {
+            Container(processo, "Processo de Exportação", "Java, Spring Boot", "Cria, Edita, Cancela e gere os saldos de um Processo Exportação",  $sprite="java", $tags="microService")
+            Container(analytics, "Analytics de Exportação", "Java, Spring Boot", "Responsável pelas lógicas dos dashboards e relatórios das Exportações",  $sprite="java", $tags="microService")
+            Container(custo, "Custos de Exportação", "Java, Spring Boot", "Responsável pelos cálculos e registro dos custos de Exportação",  $sprite="java", $tags="microService")
+
+            System_Boundary(database, "Database Instance") {
+                ContainerDb(db_processo, "Processo de Exportação Schema", "Postgresql", "Armazena os dados do serviço Processo de Exportação", $sprite="AzureDatabaseForPostgreSQL")
+                ContainerDb(db_analytics, "Analytics de Exportação Schema", "Postgresql", "Armazena os dados do serviço de Analytics de Exportação", $sprite="AzureDatabaseForPostgreSQL")
+                ContainerDb(db_custo, "Custos de Exportação Schema", "Postgresql", "Armazena os dados do serviço de Custos de Exportação", $sprite="AzureDatabaseForPostgreSQL")
+            }
+        }
+    }
+}
+
+Rel(contador, spa, "Visualiza e exporta relatórios de ganhos referente aos Processos de Exportação via", "interface web")
+Rel(operacional, spa, "Visualiza e exporta relatórios de andamento geral referente aos Processos de Exportação via", "interface web")
+
+Rel(spa, analytics, "Recupera as informações referentes aos processos de Exportação via", "REST")
+
+Rel_L(analytics, processo, "Recupera os dados referentes aos Processos de Exportação para relatórios via", "REST")
+Rel_R(analytics, custo, "Recupera os dados referentes aos custos para relatórios via", "REST")
+Rel(processo, db_processo, "Via", "JDBC")
+Rel(analytics, db_analytics, "Via", "JDBC")
+Rel(custo, db_custo, "Via", "JDBC")
+
+SHOW_LEGEND()
+@enduml
