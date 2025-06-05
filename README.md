@@ -9,7 +9,7 @@
 
 ## Desenho Arquitetural
 
-![Controle de Exportação](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/edum-compassuol/adr_markdown_puml/refs/heads/main/Controle%20de%20Exporta%C3%A7%C3%A3o.puml)
+![Controle de Exportação](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/edum-compassuol/adr_markdown_puml/main/controle_export.puml)
 
 ## ADRs
 
